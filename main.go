@@ -3,7 +3,10 @@ package main
 import (
 	"database/sql"
 	"fmt"
+	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
+	"net/http"
+	"strconv"
 	"time"
 )
 
@@ -14,12 +17,32 @@ func main() {
 	db, err = sql.Open("sqlite3", "./db.sql")
 	checkErr(err)
 
-	AddPushups(5)
-	AddPushups(10)
+	r := mux.NewRouter()
+	r.HandleFunc("/pushups", GetTotalHandler).Methods("GET")
+	r.HandleFunc("/pushups/{count}", AddPushupsHandler).Methods("POST")
 
+	http.ListenAndServe(":8080", r)
+}
+
+func AddPushupsHandler(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	count := vars["count"]
+
+	i, err := strconv.Atoi(count)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	AddPushups(i)
+
+}
+
+func GetTotalHandler(w http.ResponseWriter, r *http.Request) {
 	total := GetTotal()
 
-	fmt.Printf("Total pushups %d", total)
+	fmt.Fprintf(w, "%d", total)
+
 }
 
 func AddPushups(count int) {
