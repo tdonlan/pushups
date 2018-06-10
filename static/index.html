@@ -1,4 +1,50 @@
+<!DOCTYPE html>
 <html>
+<head>
+	<title></title>
+</head>
 <body>
-	<p>
-	hello world</p></body></html>
+<div id="app">
+	<h1> Total! {{ total }} </h1>
+	<line-chart data="/pushups/graph"></line-chart>
+  <p>Pushups Today? <input v-model="count"> <button v-on:click="postCount">Post!</button></p>
+	
+</div>
+</body>
+<script src="https://cdn.jsdelivr.net/npm/vue"></script>
+<script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
+<script src="https://unpkg.com/chart.js@2.7.2/dist/Chart.bundle.js"></script>
+<script src="https://unpkg.com/vue-chartkick@0.3.3"></script>
+<script type="text/javascript">
+	
+var app = new Vue({
+  el: '#app',
+  data: {
+    count: 0,
+    total: 0,
+    history: null
+  },
+  methods:{
+  	  postCount: function(){
+  	  	var url = "/pushups/" + this.count;
+  	  	Vue.http.post(url).then((response) => {
+  	  		this.total = response.data;
+  	  	})
+  	  },
+  	  getTotal: function(){
+  	  	Vue.http.get("/pushups/total").then((response) =>{
+  	  		this.total = response.data;
+  	  	})
+  	  },
+  	  getHistory: function(){
+  	  	Vue.http.get("/pushups").then((response) =>{
+  	  		this.history = response.data;
+  	  	})
+  	  }
+  }
+})
+
+app.getTotal();
+
+</script>
+</html>

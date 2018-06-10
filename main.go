@@ -2,6 +2,7 @@ package main
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
@@ -13,6 +14,12 @@ import (
 
 var db *sql.DB
 
+type PushupHistory struct {
+	Id        int
+	Count     int
+	Timestamp time.Time
+}
+
 func main() {
 	var err error
 	db, err = sql.Open("sqlite3", "./db.sql")
@@ -21,7 +28,9 @@ func main() {
 	r := mux.NewRouter()
 
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
-	r.HandleFunc("/pushups", GetTotalHandler).Methods("GET")
+	r.HandleFunc("/pushups/total", GetTotalHandler).Methods("GET")
+	r.HandleFunc("/pushups/graph", GetPushupsGraph).Methods("GET")
+	r.HandleFunc("/pushups", GetPushupsHandler).Methods("GET")
 	r.HandleFunc("/pushups/{count}", AddPushupsHandler).Methods("POST")
 
 	log.Println("Pushups! Listening at port 8080")
@@ -51,6 +60,40 @@ func GetTotalHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func GetPushupsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	pushups := GetPushups()
+
+	pJson, err := json.Marshal(pushups)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	fmt.Fprintf(w, "%s", pJson)
+}
+
+func GetPushupsGraph(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json")
+	pushups := GetPushups()
+
+	graphData := map[string]int{}
+
+	for _, v := range *pushups {
+		graphData[v.Timestamp.Format("2006-01-02 15:04:05")] = v.Count
+	}
+
+	gJson, err := json.Marshal(graphData)
+	if err != nil {
+		http.Error(w, http.StatusText(http.StatusBadRequest), http.StatusBadRequest)
+		return
+	}
+
+	fmt.Fprintf(w, "%s", gJson)
+}
+
+//-----------------
+
 func AddPushups(count int) {
 	sql := `insert into pushups (count, timestamp) values (?, datetime('now'));`
 	stmt, err := db.Prepare(sql)
@@ -76,6 +119,24 @@ func GetTotal() int {
 	}
 
 	return total
+}
+
+func GetPushups() *[]PushupHistory {
+	pushups := []PushupHistory{}
+
+	sql := `select * from pushups`
+	rows, err := db.Query(sql)
+	checkErr(err)
+
+	for rows.Next() {
+		var p PushupHistory
+		err = rows.Scan(&p.Id, &p.Count, &p.Timestamp)
+		checkErr(err)
+
+		pushups = append(pushups, p)
+	}
+
+	return &pushups
 }
 
 func checkErr(err error) {
