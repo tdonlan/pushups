@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/gorilla/mux"
 	_ "github.com/mattn/go-sqlite3"
+	"log"
 	"net/http"
 	"strconv"
 	"time"
@@ -18,10 +19,13 @@ func main() {
 	checkErr(err)
 
 	r := mux.NewRouter()
+
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("static/"))))
 	r.HandleFunc("/pushups", GetTotalHandler).Methods("GET")
 	r.HandleFunc("/pushups/{count}", AddPushupsHandler).Methods("POST")
 
-	http.ListenAndServe(":8080", r)
+	log.Println("Pushups! Listening at port 8080")
+	log.Fatal(http.ListenAndServe(":8080", r))
 }
 
 func AddPushupsHandler(w http.ResponseWriter, r *http.Request) {
@@ -35,6 +39,8 @@ func AddPushupsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	AddPushups(i)
+
+	GetTotalHandler(w, r)
 
 }
 
