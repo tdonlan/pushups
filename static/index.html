@@ -13,9 +13,9 @@
   </div>
   <div class="row">
     <div class="container-fluid">
-    <button v-on:mousedown="startSubDown" v-on:mouseup="stopSubDown">-</button>
+    <button v-on:mousedown="startSubDown"  v-on:mouseup="stopSubDown" v-on:touchstart="startSubDown" v-on:touchend="stopSubDown">-</button>
     {{count}} 
-    <button v-on:mousedown="startPlusDown" v-on:mouseup="stopPlusDown">+</button>
+    <button v-on:mousedown="startPlusDown" v-on:mouseup="stopPlusDown" v-on:touchstart="startPlusDown" v-on:touchend="stopPlusDown">+</button>
     <br>
     <button v-on:click="postCount">Save!</button>
   </div>
