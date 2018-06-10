@@ -1,13 +1,26 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title></title>
+	<title>Pushup Tracker!</title>
+   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
 </head>
 <body>
-<div id="app">
-	<h1> Total! {{ total }} </h1>
-	<line-chart data="/pushups/graph"></line-chart>
-  <p>Pushups Today? <input v-model="count"> <button v-on:click="postCount">Post!</button></p>
+<div id="app" class="container-fluid">
+  <div class="row">
+  	<h1> Total! {{ total }} </h1>
+  	<line-chart data="/pushups/graph"></line-chart>
+  </div>
+  <div class="row">
+    <div class="container-fluid">
+    <button v-on:mousedown="startSubDown" v-on:mouseup="stopSubDown">-</button>
+    {{count}} 
+    <button v-on:mousedown="startPlusDown" v-on:mouseup="stopPlusDown">+</button>
+    <br>
+    <button v-on:click="postCount">Save!</button>
+  </div>
+  </div>
+</div>
 	
 </div>
 </body>
@@ -22,12 +35,47 @@ var app = new Vue({
   data: {
     count: 0,
     total: 0,
-    history: null
+    history: null,
+    isPlusDown: false,
+    isSubDown: false
   },
   methods:{
+      ready: function(){
+        this.getTotal();
+
+        setInterval(function () {
+          this.incrementer();
+        }.bind(this), 100); 
+      },
+      startPlusDown: function(){
+        this.isPlusDown = true;
+      },
+      stopPlusDown: function(){
+        this.isPlusDown = false;
+      },
+      startSubDown: function(){
+        this.isSubDown = true;
+      },
+      stopSubDown: function(){
+        this.isSubDown = false;
+      },
+      plusCount: function(){
+        this.count ++;
+      },
+      subCount: function(){
+        this.count --;
+      },
+      incrementer: function(){
+        if (this.isPlusDown){
+          this.count++;
+        } else if (this.isSubDown){
+          this.count--;
+        }
+      },
   	  postCount: function(){
   	  	var url = "/pushups/" + this.count;
   	  	Vue.http.post(url).then((response) => {
+          this.count = 0;
   	  		this.total = response.data;
   	  	})
   	  },
@@ -44,7 +92,7 @@ var app = new Vue({
   }
 })
 
-app.getTotal();
+app.ready();
 
 </script>
 </html>
