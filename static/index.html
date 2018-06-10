@@ -6,23 +6,33 @@
 <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
 </head>
 <body>
+
 <div id="app" class="container-fluid">
   <div class="row">
-  	<h1> Total! {{ total }} </h1>
-  	<line-chart data="/pushups/graph"></line-chart>
+  	<div class="col"><h1> Total: {{ total }} </h1></div>
+
   </div>
+
   <div class="row">
-    <div class="container-fluid">
-    <button v-on:mousedown="startSubDown"  v-on:mouseup="stopSubDown" v-on:touchstart="startSubDown" v-on:touchend="stopSubDown">-</button>
-    {{count}} 
-    <button v-on:mousedown="startPlusDown" v-on:mouseup="stopPlusDown" v-on:touchstart="startPlusDown" v-on:touchend="stopPlusDown">+</button>
-    <br>
-    <button v-on:click="postCount">Save!</button>
-  </div>
-  </div>
+
+<div class="col-sm"><button v-on:mousedown="startSubDown"  v-on:mouseup="stopSubDown" v-on:touchstart="startSubDown" v-on:touchend="stopSubDown" class="btn btn-primary btn-lg">-</button> </div>
+
+<div class="col-sm"> <h2>{{count}}</h2> </div>
+
+<div class="col-sm"><button v-on:mousedown="startPlusDown" v-on:mouseup="stopPlusDown" v-on:touchstart="startPlusDown" v-on:touchend="stopPlusDown" class="btn btn-primary btn-lg">+</button></div>
 </div>
-	
+<br>
+<div class="row">
+<div class="col"><button v-on:click="postCount" class="btn btn-primary btn-lg">Save!</button></div>
 </div>
+
+
+  <div class="row">
+        <line-chart data="/pushups/graph"></line-chart>
+  </div>
+
+</div>
+
 </body>
 <script src="https://cdn.jsdelivr.net/npm/vue"></script>
 <script src="https://cdn.jsdelivr.net/npm/vue-resource@1.5.1"></script>
